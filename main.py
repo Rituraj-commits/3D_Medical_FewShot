@@ -73,12 +73,20 @@ def main():
         )  ## 5*512*4*16*16
         out = decoder(relation_pairs, ft_list)
 
-        bce = nn.BCELoss().cuda(GPU)
+        bce = nn.BCEWithLogitsLoss().cuda(GPU)
         loss = bce(out, Variable(qry_labels).cuda(GPU))
         loss.backward()
 
+        encoder_optim.step()
+        decoder_optim.step()
+
         if (episode + 1) % 10 == 0:
             print("\nepisode:", episode + 1, "loss", loss.item())
+
+        if not os.path.exists(args.TrainResultPath):
+            os.makedirs(args.TrainResultPath)
+        if not os.path.exists(args.ModelSavePath):
+            os.makedirs(args.ModelSavePath)
 
         if (episode + 1) % args.ModelSaveFreq == 0:
 
